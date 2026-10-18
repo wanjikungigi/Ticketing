@@ -1,0 +1,157 @@
+
+{% extends "base.html" %}
+{% block title %}{{ event.name }} | Discover the Experience{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="reveal">
+            <span class="eyebrow">Your next unforgettable experience</span>
+            <h1>Good people.<br>Great ideas.<br><em>One place.</em></h1>
+            <p class="hero-copy">{{ event.tagline }} Join us for a gathering of people, businesses, creativity and new opportunities.</p>
+
+            <div class="hero-actions">
+                <a class="btn btn-gold" href="{{ url_for('tickets_page') }}">Explore tickets <span>↗</span></a>
+                <a class="btn btn-outline" href="{{ url_for('booths_page') }}">Become an exhibitor</a>
+            </div>
+
+            <div class="hero-meta">
+                <div><strong>{{ event.event_date }}</strong><span>Event date</span></div>
+                <div><strong>{{ event.venue }}</strong><span>Venue</span></div>
+                <div><strong>One experience</strong><span>Endless connections</span></div>
+            </div>
+        </div>
+
+        <div class="hero-art" aria-label="Decorative event illustration">
+            <div class="art-orbit">
+                <div class="art-center">✦</div>
+                <div class="art-label one"><strong>DISCOVER</strong>New experiences</div>
+                <div class="art-label two"><strong>CONNECT</strong>Meet your people</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="info-strip">
+    <div class="container info-grid">
+        <div class="info-item">
+            <div class="info-icon">◷</div>
+            <div><strong>{{ event.event_date }}</strong><span>Save the date</span></div>
+        </div>
+        <div class="info-item">
+            <div class="info-icon">⌖</div>
+            <div><strong>{{ event.venue }}</strong><span>Find your way here</span></div>
+        </div>
+        <div class="info-item">
+            <div class="info-icon">✧</div>
+            <div><strong>Be part of it</strong><span>Book a ticket or exhibit</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="tickets">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Your experience starts here</span>
+                <h2>Find your kind<br>of ticket.</h2>
+            </div>
+            <p>Choose the experience that suits you. Secure your booking in a few simple steps.</p>
+        </div>
+
+        <div class="cards">
+            {% for ticket in tickets %}
+            <article class="card">
+                <div class="card-top">
+                    <span class="card-tag">{{ 'Featured experience' if loop.first else 'Your event access' }}</span>
+                    <h3>{{ ticket.name }}</h3>
+                    <p class="card-description">Your entry to {{ event.name }}.</p>
+                    <div class="price">KES {{ "{:,}".format(ticket.price) }} <small>/ person</small></div>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>Booking reference provided</li>
+                        <li>Simple online registration</li>
+                        <li>{{ ticket.quantity }} currently listed</li>
+                    </ul>
+                    <a class="btn btn-dark btn-block" href="{{ url_for('tickets_page') }}">Choose this ticket ↗</a>
+                </div>
+            </article>
+            {% else %}
+            <div class="panel">
+                <h3>Tickets coming soon</h3>
+                <p class="muted">There are no ticket options available right now. Please check back soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align:center;margin-top:28px">
+            <a class="btn btn-outline" href="{{ url_for('tickets_page') }}">View all tickets →</a>
+        </div>
+    </div>
+</section>
+
+<section class="feature-band">
+    <div class="container feature-band-inner">
+        <div>
+            <span class="eyebrow">For businesses & brands</span>
+            <h2>Bring your brand into the room.</h2>
+            <p>Showcase your products, meet customers and create new business opportunities with an exhibitor space.</p>
+        </div>
+        <a class="btn btn-dark" href="{{ url_for('booths_page') }}">Explore booth packages ↗</a>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Exhibit with us</span>
+                <h2>Your brand deserves<br>to be seen.</h2>
+            </div>
+            <p>Choose a space that fits your goals, from a focused showcase to a larger brand activation.</p>
+        </div>
+
+        <div class="cards">
+            {% for booth in booths %}
+            <article class="card">
+                <div class="card-top">
+                    <span class="card-tag">{{ booth.size }}</span>
+                    <h3>{{ booth.name }}</h3>
+                    <p class="card-description">A space to present your brand and connect with visitors.</p>
+                    <div class="price">KES {{ "{:,}".format(booth.price) }} <small>/ space</small></div>
+                </div>
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>Dedicated exhibitor space</li>
+                        <li>Online booking record</li>
+                        <li>{{ booth.quantity }} currently listed</li>
+                    </ul>
+                    <a class="btn btn-dark btn-block" href="{{ url_for('booths_page') }}">Explore this space ↗</a>
+                </div>
+            </article>
+            {% else %}
+            <div class="panel">
+                <h3>Exhibitor spaces coming soon</h3>
+                <p class="muted">No booth packages are currently available.</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align:center;margin-top:28px">
+            <a class="btn btn-outline" href="{{ url_for('booths_page') }}">View all booth packages →</a>
+        </div>
+    </div>
+</section>
+
+<section class="section-sm">
+    <div class="container panel" style="background:var(--ink);color:white;padding:clamp(28px,5vw,55px);">
+        <span class="eyebrow">Make your plans</span>
+        <div class="feature-band-inner" style="margin-top:10px">
+            <div>
+                <h2 style="font:500 clamp(2rem,4vw,3rem) 'Playfair Display',serif;margin:8px 0">We'll see you there.</h2>
+                <p style="color:#c4c0b3">Your next connection, idea or favourite memory could start here.</p>
+            </div>
+            <a class="btn btn-gold" href="{{ url_for('tickets_page') }}">Book your place ↗</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

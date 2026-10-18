@@ -1,0 +1,103 @@
+
+{% extends "base.html" %}
+{% block title %}Exhibitor Spaces | {{ event.name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Exhibitor registration</span>
+        <h1>Put your brand<br>in the spotlight.</h1>
+        <p>Connect with potential customers, showcase your products and create opportunities for your business at {{ event.name }}.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Find your space</span>
+                <h2>Booth packages</h2>
+            </div>
+            <p>Choose your preferred space and submit your exhibitor booking details.</p>
+        </div>
+
+        <div class="cards">
+            {% for booth in booths %}
+            <article class="card">
+                <div class="card-top">
+                    <span class="card-tag">{{ booth.size }}</span>
+                    <h3>{{ booth.name }}</h3>
+                    <p class="card-description">A dedicated space for your brand to be discovered.</p>
+                    <div class="price">KES {{ "{:,}".format(booth.price) }} <small>/ booth</small></div>
+                </div>
+
+                <div class="card-body">
+                    <ul class="feature-list">
+                        <li>Dedicated exhibition space</li>
+                        <li>Booking reference for follow-up</li>
+                        <li>Availability: {{ booth.quantity }}</li>
+                    </ul>
+
+                    <form class="booking-form"
+                          method="POST"
+                          action="{{ url_for('create_order', kind='booth', item_id=booth.id) }}"
+                          data-booking-form
+                          data-price="{{ booth.price }}"
+                          data-max="{{ booth.quantity }}">
+
+                        <div class="field">
+                            <label for="name-{{ booth.id }}">Business / contact name</label>
+                            <input id="name-{{ booth.id }}" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Business or contact name" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="email-{{ booth.id }}">Business email</label>
+                            <input id="email-{{ booth.id }}" name="email" type="email" maxlength="254" autocomplete="email" placeholder="business@example.com" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="phone-{{ booth.id }}">Contact phone</label>
+                            <input id="phone-{{ booth.id }}" name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="e.g. 0712345678" required>
+                        </div>
+
+                        <div class="quantity-row">
+                            <label for="quantity-{{ booth.id }}" class="small">Number of booths</label>
+                            <div class="stepper">
+                                <button type="button" data-step="-1" aria-label="Decrease booth quantity">−</button>
+                                <input id="quantity-{{ booth.id }}" name="quantity" type="number" value="1" min="1" max="{{ booth.quantity }}" data-quantity required>
+                                <button type="button" data-step="1" aria-label="Increase booth quantity">+</button>
+                            </div>
+                        </div>
+
+                        <div class="total-row">
+                            <span>Total booking amount</span>
+                            <strong data-total>KES {{ "{:,}".format(booth.price) }}</strong>
+                        </div>
+
+                        <button class="btn btn-dark btn-block" type="submit">Reserve this space ↗</button>
+                        <p class="muted small" style="margin:0;text-align:center">Reservation remains pending until payment is verified.</p>
+                    </form>
+                </div>
+            </article>
+            {% else %}
+            <div class="panel">
+                <h3>No exhibitor spaces available</h3>
+                <p class="muted">Please contact the event organizer for future opportunities.</p>
+                <a class="btn btn-dark" href="{{ url_for('index') }}">Back to home</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="feature-band">
+    <div class="container feature-band-inner">
+        <div>
+            <span class="eyebrow">Have a question?</span>
+            <h2>Let's get your brand ready.</h2>
+            <p>For custom booth requirements, sponsorship opportunities or larger spaces, contact the event organizer directly.</p>
+        </div>
+        <a class="btn btn-dark" href="{{ url_for('index') }}">Explore the event ↗</a>
+    </div>
+</section>
+{% endblock %}

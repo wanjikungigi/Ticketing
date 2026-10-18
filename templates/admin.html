@@ -1,0 +1,210 @@
+
+{% extends "base.html" %}
+{% block title %}Organizer Dashboard | {{ event.name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Event management</span>
+        <h1>Organizer dashboard.</h1>
+        <p>Manage your event identity, review registrations and monitor the booking pipeline from one place.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Your overview</span>
+                <h2>Event at a glance.</h2>
+            </div>
+            <span class="status">Local development mode</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span>Total bookings</span>
+                <strong>{{ totals.order_count }}</strong>
+                <span>Tickets and booth orders</span>
+            </div>
+            <div class="stat-card">
+                <span>Paid revenue</span>
+                <strong>KES {{ "{:,}".format(totals.paid_total) }}</strong>
+                <span>Orders marked PAID</span>
+            </div>
+            <div class="stat-card">
+                <span>Pending amount</span>
+                <strong>KES {{ "{:,}".format(totals.pending_total) }}</strong>
+                <span>Not confirmed as revenue</span>
+            </div>
+        </div>
+
+        <div class="admin-layout">
+            <section class="panel">
+                <span class="eyebrow">Event identity</span>
+                <h2 style="font:600 1.7rem 'Playfair Display',serif;margin:12px 0 22px">Customize your event</h2>
+
+                <form method="POST" action="{{ url_for('admin_dashboard') }}" class="booking-form">
+                    <div class="field">
+                        <label for="name">Event name</label>
+                        <input id="name" name="name" type="text" maxlength="150" value="{{ event.name }}" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="tagline">Tagline</label>
+                        <input id="tagline" name="tagline" type="text" maxlength="250" value="{{ event.tagline }}" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="event_date">Event date</label>
+                        <input id="event_date" name="event_date" type="text" maxlength="100" value="{{ event.event_date }}" placeholder="e.g. 27–29 March 2027" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="venue">Venue</label>
+                        <input id="venue" name="venue" type="text" maxlength="200" value="{{ event.venue }}" placeholder="Enter venue" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="primary_color">Brand colour</label>
+                        <div style="display:flex;gap:12px;align-items:center">
+                            <input id="primary_color" name="primary_color" type="text" pattern="#[0-9a-fA-F]{6}" value="{{ event.primary_color }}" required>
+                            <input id="colorPicker" type="color" value="{{ event.primary_color }}" aria-label="Choose brand colour" style="width:55px;height:45px;padding:4px;border:1px solid var(--line);border-radius:10px;background:white">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark btn-block">Save event settings ✓</button>
+                    <p class="muted small">Changes apply to the event branding shown on the public pages.</p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <span class="eyebrow">Inventory overview</span>
+                <h2 style="font:600 1.7rem 'Playfair Display',serif;margin:12px 0 22px">Tickets & booths</h2>
+
+                <h3 style="font-size:1rem">Ticket types</h3>
+                {% for ticket in tickets %}
+                <div class="detail-row">
+                    <span>{{ ticket.name }}</span>
+                    <strong>KES {{ "{:,}".format(ticket.price) }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Available quantity</span>
+                    <strong>{{ ticket.quantity }} · {{ 'Active' if ticket.active else 'Inactive' }}</strong>
+                </div>
+                {% else %}
+                <p class="muted">No ticket types have been created.</p>
+                {% endfor %}
+
+                <h3 style="font-size:1rem;margin-top:28px">Booth packages</h3>
+                {% for booth in booths %}
+                <div class="detail-row">
+                    <span>{{ booth.name }} · {{ booth.size }}</span>
+                    <strong>KES {{ "{:,}".format(booth.price) }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Available quantity</span>
+                    <strong>{{ booth.quantity }} · {{ 'Active' if booth.active else 'Inactive' }}</strong>
+                </div>
+                {% else %}
+                <p class="muted">No booth packages have been created.</p>
+                {% endfor %}
+
+                <div class="flash" style="margin-top:20px">
+                    Inventory is currently displayed for review. This page does not yet provide controls to add, edit or deactivate ticket and booth packages.
+                </div>
+            </section>
+        </div>
+
+        <div style="margin-top:42px">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Registration records</span>
+                    <h2>Recent bookings</h2>
+                </div>
+                <button class="btn btn-outline" id="exportCsv" type="button">Export CSV ↓</button>
+            </div>
+
+            <div class="table-wrap">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Customer</th>
+                            <th>Type</th>
+                            <th>Package</th>
+                            <th>Qty</th>
+                            <th>Total (KES)</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td><strong>{{ order.reference }}</strong></td>
+                            <td>
+                                {{ order.customer_name }}<br>
+                                <span class="muted">{{ order.email }}</span><br>
+                                <span class="muted">{{ order.phone }}</span>
+                            </td>
+                            <td>{{ 'Ticket' if order.order_type == 'ticket' else 'Booth' }}</td>
+                            <td>{{ order.item_name }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>{{ "{:,}".format(order.total_amount) }}</td>
+                            <td>
+                                <span class="status {% if order.payment_status == 'PAID' %}paid{% elif order.payment_status == 'FAILED' %}failed{% endif %}">
+                                    {{ order.payment_status }}
+                                </span>
+                            </td>
+                            <td>{{ order.created_at[:10] }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="empty">No bookings yet. New registrations will appear here.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted small" style="margin-top:12px">Keep customer information private. Add administrator authentication and access controls before deploying this dashboard publicly.</p>
+        </div>
+    </div>
+</section>
+
+<script>
+    const colorPicker = document.getElementById("colorPicker");
+    const colorText = document.getElementById("primary_color");
+
+    colorPicker.addEventListener("input", () => {
+        colorText.value = colorPicker.value;
+    });
+
+    colorText.addEventListener("input", () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(colorText.value)) {
+            colorPicker.value = colorText.value;
+        }
+    });
+
+    document.getElementById("exportCsv").addEventListener("click", () => {
+        const table = document.getElementById("ordersTable");
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const csv = rows.map(row =>
+            Array.from(row.querySelectorAll("th, td")).map(cell => {
+                const value = cell.innerText.replace(/\s+/g, " ").trim();
+                return '"' + value.replace(/"/g, '""') + '"';
+            }).join(",")
+        ).join("\r\n");
+
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "festival-bookings.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
+</script>
+{% endblock %}

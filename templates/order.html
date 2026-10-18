@@ -1,0 +1,161 @@
+
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmation | {{ event.name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Booking confirmation</span>
+        <h1>Your booking details.</h1>
+        <p>Keep your booking reference safe for future communication with the event organizer.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container order-wrap">
+
+        <div class="panel">
+            <span class="eyebrow">Booking reference</span>
+
+            <h2 style="font-family:'Playfair Display',serif; margin-top:14px;">
+                Thank you, {{ order.customer_name }}!
+            </h2>
+
+            <p class="muted">
+                Your booking has been recorded in our system.
+            </p>
+
+            <div class="reference" id="bookingReference">
+                {{ order.reference }}
+            </div>
+
+            <p style="margin-top:16px;">
+                <span class="status {% if order.payment_status == 'PAID' %}paid{% elif order.payment_status == 'FAILED' %}failed{% endif %}">
+                    {{ order.payment_status }}
+                </span>
+            </p>
+
+            {% if order.payment_status == 'PENDING' %}
+                <div class="flash">
+                    Your booking is pending payment. M-Pesa payment has not been initiated by this version of the application.
+                </div>
+            {% elif order.payment_status == 'PAID' %}
+                <div class="flash" style="background:#e3f2e8; color:#236343;">
+                    Your payment is marked as successful.
+                </div>
+            {% elif order.payment_status == 'FAILED' %}
+                <div class="flash">
+                    Your payment was unsuccessful. Please contact the event organizer.
+                </div>
+            {% endif %}
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:24px;">
+                <button class="btn btn-dark" type="button" id="copyReference">
+                    Copy reference
+                </button>
+
+                <a class="btn btn-outline" href="{{ url_for('index') }}">
+                    Back to home
+                </a>
+            </div>
+
+            <p id="copyMessage" class="muted small" role="status"></p>
+        </div>
+
+        <aside class="panel">
+            <span class="eyebrow">Order summary</span>
+
+            <h3 style="font-family:'Playfair Display',serif; margin-top:12px;">
+                Your booking
+            </h3>
+
+            <div class="detail-row">
+                <span>Event</span>
+                <strong>{{ event.name }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Booking type</span>
+                <strong>
+                    {% if order.order_type == 'ticket' %}
+                        Attendee ticket
+                    {% else %}
+                        Exhibitor booth
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Package</span>
+                <strong>{{ order.item_name }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Quantity</span>
+                <strong>{{ order.quantity }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Customer</span>
+                <strong>{{ order.customer_name }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Email</span>
+                <strong>{{ order.email }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Phone</span>
+                <strong>{{ order.phone }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Payment status</span>
+                <strong>{{ order.payment_status }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Booking date</span>
+                <strong>{{ order.created_at[:10] }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span>Total amount</span>
+                <strong style="font-size:1.2rem;">
+                    KES {{ "{:,}".format(order.total_amount) }}
+                </strong>
+            </div>
+
+            {% if order.mpesa_receipt %}
+                <div class="detail-row">
+                    <span>M-Pesa receipt</span>
+                    <strong>{{ order.mpesa_receipt }}</strong>
+                </div>
+            {% endif %}
+        </aside>
+
+    </div>
+</section>
+
+<script>
+    const copyButton = document.getElementById("copyReference");
+    const referenceElement = document.getElementById("bookingReference");
+    const messageElement = document.getElementById("copyMessage");
+
+    copyButton.addEventListener("click", async function () {
+        const reference = referenceElement.textContent.trim();
+
+        try {
+            await navigator.clipboard.writeText(reference);
+            messageElement.textContent = "Booking reference copied successfully.";
+        } catch (error) {
+            messageElement.textContent =
+                "Copy this reference manually: " + reference;
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,210 @@
+
+{% extends "base.html" %}
+
+{% block title %}Get Tickets | {{ event.name }}{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Attendee registration</span>
+        <h1>Your place awaits.</h1>
+        <p>
+            Choose your ticket, enter your details and create your booking.
+            Payment will remain pending until it is integrated and verified.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Choose your access</span>
+                <h2>Available tickets</h2>
+            </div>
+            <p>All prices are shown in Kenyan shillings.</p>
+        </div>
+
+        <div class="cards">
+
+            {% for ticket in tickets %}
+
+            <article class="card">
+
+                <div class="card-top">
+                    <span class="card-tag">
+                        {{ 'Popular choice' if loop.first else 'Event access' }}
+                    </span>
+
+                    <h3>{{ ticket.name }}</h3>
+
+                    <p class="card-description">
+                        Be part of {{ event.name }}.
+                    </p>
+
+                    <div class="price">
+                        KES {{ "{:,.2f}".format(ticket.price|float) }}
+                        <small>/ ticket</small>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <ul class="feature-list">
+                        <li>Online registration</li>
+                        <li>Unique booking reference</li>
+                        <li>
+                            {% if ticket.quantity > 0 %}
+                                {{ ticket.quantity }} tickets remaining
+                            {% else %}
+                                Sold out
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    {% if ticket.quantity > 0 %}
+
+                    <form
+                        class="booking-form"
+                        method="POST"
+                        action="{{ url_for('create_order', kind='ticket', item_id=ticket.id) }}"
+                        data-booking-form
+                        data-price="{{ ticket.price }}"
+                        data-max="{{ ticket.quantity }}"
+                    >
+
+                        <div class="field">
+                            <label for="name-{{ ticket.id }}">Full name</label>
+                            <input
+                                id="name-{{ ticket.id }}"
+                                name="name"
+                                type="text"
+                                maxlength="120"
+                                autocomplete="name"
+                                placeholder="Enter your full name"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="email-{{ ticket.id }}">Email address</label>
+                            <input
+                                id="email-{{ ticket.id }}"
+                                name="email"
+                                type="email"
+                                maxlength="254"
+                                autocomplete="email"
+                                placeholder="you@example.com"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="phone-{{ ticket.id }}">
+                                M-Pesa phone number
+                            </label>
+                            <input
+                                id="phone-{{ ticket.id }}"
+                                name="phone"
+                                type="tel"
+                                maxlength="30"
+                                autocomplete="tel"
+                                placeholder="e.g. 0712345678"
+                                required
+                            >
+                        </div>
+
+                        <div class="quantity-row">
+                            <label
+                                for="quantity-{{ ticket.id }}"
+                                class="small"
+                            >
+                                Number of tickets
+                            </label>
+
+                            <div class="stepper">
+                                <button
+                                    type="button"
+                                    data-step="-1"
+                                    aria-label="Decrease ticket quantity"
+                                >−</button>
+
+                                <input
+                                    id="quantity-{{ ticket.id }}"
+                                    name="quantity"
+                                    type="number"
+                                    value="1"
+                                    min="1"
+                                    max="{{ ticket.quantity }}"
+                                    data-quantity
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    data-step="1"
+                                    aria-label="Increase ticket quantity"
+                                >+</button>
+                            </div>
+                        </div>
+
+                        <div class="total-row">
+                            <span>Total booking amount</span>
+                            <strong data-total>
+                                KES {{ "{:,.2f}".format(ticket.price|float) }}
+                            </strong>
+                        </div>
+
+                        <button
+                            class="btn btn-dark btn-block"
+                            type="submit"
+                        >
+                            Continue with booking ↗
+                        </button>
+
+                        <p
+                            class="muted small"
+                            style="margin:0;text-align:center"
+                        >
+                            This demo does not collect payments yet.
+                        </p>
+
+                    </form>
+
+                    {% else %}
+
+                    <button
+                        class="btn btn-dark btn-block"
+                        type="button"
+                        disabled
+                    >
+                        Sold out
+                    </button>
+
+                    {% endif %}
+
+                </div>
+            </article>
+
+            {% else %}
+
+            <div class="panel">
+                <h3>No tickets available</h3>
+                <p class="muted">
+                    Please check back when registration opens.
+                </p>
+                <a class="btn btn-dark" href="{{ url_for('index') }}">
+                    Back to home
+                </a>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+```
